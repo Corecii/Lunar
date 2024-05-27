@@ -1,0 +1,6 @@
+# Build artifacts
+/target
+
+# Personal testing files
+aftman.toml
+lune

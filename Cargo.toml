@@ -1,0 +1,21 @@
+[package]
+name = "lunar-tr"
+description = "A Task Runner for Lune"
+homepage = "https://github.com/corecii/lunar"
+repository = "https://github.com/corecii/lunar"
+license = "MIT"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.86"
+base64 = "0.22.1"
+clap = { version = "4.5.4", features = [ "derive", "string" ] }
+dirs = "5.0.1"
+regex = "1.10.4"
+serde = { version = "1.0.202", features = ["derive"] }
+serde_json = "1.0.117"
+toml = "0.8.13"
+uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics"] }
