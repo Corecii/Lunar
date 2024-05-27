@@ -25,7 +25,8 @@ env:
   action_ref: ${{ github.ref }}
   action_version: ${{ github.event.inputs.version || github.ref_name }}
   PROJECT_VERSION: ${{ github.event.inputs.version || github.ref_name }}
-  BIN: lunar
+  OUTPUT_BIN: lunar
+  INTERNAL_BIN: lunar-tr
 
 jobs:
   create-release:
@@ -117,11 +118,11 @@ jobs:
           mkdir staging
 
           if [ "${{ matrix.host }}" = "windows" ]; then
-            cp "output/release/$BIN.exe" staging/
+            cp "output/release/$INTERNAL_BIN.exe" staging/$OUTPUT_BIN.exe
             cd staging
             7z a ../release.zip *
           else
-            cp "output/release/$BIN" staging/
+            cp "output/release/$INTERNAL_BIN" staging/$OUTPUT_BIN
             cd staging
             zip ../release.zip *
           fi
@@ -129,15 +130,15 @@ jobs:
       - name: Upload Archive to Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip
+          name: ${{ env.OUTPUT_BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip
           path: release.zip
 
       - name: Upload Archive to Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mv release.zip ${{ env.BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip
-          gh release upload ${{ env.action_version }} ${{ env.BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip --clobber
+          mv release.zip ${{ env.OUTPUT_BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip
+          gh release upload ${{ env.action_version }} ${{ env.OUTPUT_BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip --clobber
 
 # Based on
 # https://github.com/UpliftGames/rojo/blob/ed5b8ac63c82148c5d6abb6f8ff47bbf2f562d4e/.github/workflows/release.yml
