@@ -18,8 +18,6 @@ lunar = "corecii/lunar@0.1.0"
 
 OR download it from [the Releases page](https://github.com/corecii/lunar/releases/latest) and put it in your `PATH`.
 
-OR install it yourself with `cargo install lunar-tr`
-
 ## Cheat Sheet
 
 I figure the easiest way to get across what Lunar can do is to give some examples.
