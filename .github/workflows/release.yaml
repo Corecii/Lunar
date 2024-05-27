@@ -25,7 +25,7 @@ env:
   action_ref: ${{ github.ref }}
   action_version: ${{ github.event.inputs.version || github.ref_name }}
   PROJECT_VERSION: ${{ github.event.inputs.version || github.ref_name }}
-  BIN: rojo
+  BIN: lunar
 
 jobs:
   create-release:
