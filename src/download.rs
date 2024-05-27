@@ -41,7 +41,7 @@ pub fn fetch_repo(info: &StandaloneTaskConfigRepo) -> Result<PathBuf> {
     // We do this to avoid hitting the Windows 256-char path limit, which tends
     // to break Git.
 
-    let hash = fetch_repo_hash(&info)?;
+    let hash = fetch_repo_hash(info)?;
     let short_hash = hash.chars().take(20).collect::<String>();
 
     static REGEX: OnceLock<Regex> = OnceLock::new();
@@ -62,7 +62,7 @@ pub fn fetch_repo(info: &StandaloneTaskConfigRepo) -> Result<PathBuf> {
 
     let cache_dir = get_or_init_local_data()
         .join("repos")
-        .join(&repo_cache_dir_name)
+        .join(repo_cache_dir_name)
         .join(&short_hash);
 
     if cache_dir.exists() {
@@ -125,20 +125,18 @@ pub fn fetch_repo(info: &StandaloneTaskConfigRepo) -> Result<PathBuf> {
             .success_or_error()?;
     }
 
-    match std::fs::rename(&cache_dir_temp, &cache_dir) {
-        Err(e) => match e.kind() {
+    if let Err(e) = std::fs::rename(&cache_dir_temp, &cache_dir) {
+        match e.kind() {
             std::io::ErrorKind::AlreadyExists => {
-                match std::fs::remove_dir_all(&cache_dir_temp) {
-                    Err(e) => eprintln!(
+                if let Err(e) = std::fs::remove_dir_all(&cache_dir_temp) {
+                    eprintln!(
                         "Failed to remove cache directory (continuing anyways): {:?} {}",
                         &cache_dir_temp, e
-                    ),
-                    _ => (),
+                    )
                 };
             }
             _ => Err(e).with_context(|| "Failed to rename cache directory")?,
-        },
-        _ => (),
+        }
     };
 
     Ok(cache_dir)

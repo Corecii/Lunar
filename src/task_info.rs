@@ -34,6 +34,7 @@ fn add_inline_task(
     info: InlineTaskInfo,
     subtask_args: Vec<String>,
 ) {
+    #[allow(clippy::bool_comparison)]
     if info.hide.unwrap_or(false) == false {
         tasks.insert(
             name.to_string(),

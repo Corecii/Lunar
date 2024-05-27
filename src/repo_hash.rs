@@ -17,7 +17,7 @@ struct RepoHashCache {
 
 fn try_read_hash_cache() -> Result<Option<RepoHashCache>> {
     let cache_file = get_or_init_local_data().join("repo_hash_cache.json");
-    let contents = match std::fs::read_to_string(&cache_file) {
+    let contents = match std::fs::read_to_string(cache_file) {
         Ok(contents) => contents,
         Err(e) => match e.kind() {
             std::io::ErrorKind::NotFound => {

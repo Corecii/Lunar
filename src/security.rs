@@ -22,7 +22,7 @@ fn read_trust_file() -> Result<TrustFile> {
 
 fn write_trust_file(trust_file: &TrustFile) -> Result<()> {
     let path = get_or_init_local_data().join("trust_cache.json");
-    std::fs::write(&path, serde_json::to_string(trust_file)?)?;
+    std::fs::write(path, serde_json::to_string(trust_file)?)?;
     Ok(())
 }
 

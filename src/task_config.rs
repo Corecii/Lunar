@@ -108,10 +108,8 @@ pub fn get_selector_tasks(
         let mut subtasks = HashMap::new();
         get_directory_tasks(directory, &mut subtasks)?;
 
-        let scripts_filter: Option<HashSet<String>> = selector
-            .tasks
-            .clone()
-            .map(|s| HashSet::from_iter(s.into_iter()));
+        let scripts_filter: Option<HashSet<String>> =
+            selector.tasks.clone().map(HashSet::from_iter);
 
         for (name, path) in subtasks {
             if let Some(scripts) = &scripts_filter {
