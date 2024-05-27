@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag'
+        required: true
+        type: string
+      create_tag:
+        description: 'Should we create a new tag?'
+        required: true
+        type: boolean
+        default: true
+      force_push_tag:
+        description: 'Should we force push the new tag?'
+        required: true
+        type: boolean
+        default: false
+
+
+env:
+  action_ref: ${{ github.ref }}
+  action_version: ${{ github.event.inputs.version || github.ref_name }}
+  PROJECT_VERSION: ${{ github.event.inputs.version || github.ref_name }}
+  BIN: rojo
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.action_ref }}
+
+      - name: Create Tag
+        if: ${{ inputs.create_tag }}
+        id: "tag_create"
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ inputs.version }}
+          force_push_tag: ${{ inputs.force_push_tag }}
+          message: "Release ${{ inputs.version }}"
+
+      - name: Create Release gh
+        id: create_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create ${{ env.action_version }} --verify-tag --draft --title ${{ env.action_version }}
+
+  build:
+    needs: ["create-release"]
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://doc.rust-lang.org/rustc/platform-support.html
+        include:
+          - host: linux
+            os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+            label: linux-x86_64
+
+          - host: windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            label: windows-x86_64
+
+          - host: macos
+            os: macos-latest
+            target: x86_64-apple-darwin
+            label: macos-x86_64
+
+          - host: macos
+            os: macos-latest
+            target: aarch64-apple-darwin
+            label: macos-aarch64
+
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.action_ref }}
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+          profile: minimal
+
+      - name: Cache Rust Build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> output"
+
+      - name: Build Release
+        run: cargo build --release --locked --verbose
+        env:
+          # Build into a known directory so we can find our build artifact more
+          # easily.
+          CARGO_TARGET_DIR: output
+
+          # On platforms that use OpenSSL, ensure it is statically linked to
+          # make binaries more portable.
+          OPENSSL_STATIC: 1
+
+      - name: Create Release Archive
+        shell: bash
+        run: |
+          mkdir staging
+
+          if [ "${{ matrix.host }}" = "windows" ]; then
+            cp "output/release/$BIN.exe" staging/
+            cd staging
+            7z a ../release.zip *
+          else
+            cp "output/release/$BIN" staging/
+            cd staging
+            zip ../release.zip *
+          fi
+
+      - name: Upload Archive to Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip
+          path: release.zip
+
+      - name: Upload Archive to Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mv release.zip ${{ env.BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip
+          gh release upload ${{ env.action_version }} ${{ env.BIN }}-${{ env.PROJECT_VERSION }}-${{ matrix.label }}.zip --clobber
+
+# Based on
+# https://github.com/UpliftGames/rojo/blob/ed5b8ac63c82148c5d6abb6f8ff47bbf2f562d4e/.github/workflows/release.yml
+# under the MIT license
