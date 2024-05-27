@@ -184,7 +184,7 @@ Lunar has a simple trust procedure to prevent mistakes, but we are not liable fo
 
 Lunar caches each repo+hash the first time it's used. If the current hash for a tag or branch can't be fetched from the internet, the cached hash and data for that hash will be used.
 
-Lunar caches each repo by doing a shallow clone of the specific git hash that was targeted. If targeting a tag or a branch, the get hash is fetched first. When specifying a tag or branch, Lunar will automatically download newer versions of the repo when the tag or branch points to a newer commit. **Cached repos are not automatically cleaned up,** but they are shallow clones so they _don't_ contain the full history.
+Lunar caches each repo by doing a shallow clone of the specific git hash that was targeted. If targeting a tag or a branch, the git hash is fetched first. When specifying a tag or branch, Lunar will automatically download newer versions of the repo when the tag or branch points to a newer commit. **Cached repos are not automatically cleaned up,** but they are shallow clones so they _don't_ contain the full history.
 
 Lunar by default keeps data in `data_local/.lunar-tr` . You can change this directory with the `LUNAR_TR_DIR` environment variable. See [dirs documentation](https://docs.rs/dirs/5.0.1/dirs/fn.data_local_dir.html) for information about where `data_local` is on your system.
 
@@ -192,7 +192,7 @@ Lunar by default keeps data in `data_local/.lunar-tr` . You can change this dire
 
 Lunar doesn't bundle Lune or Git. It uses the versions installed on your system. If we bundled these, we'd have to make a new release every time Lune or Git updated.
 
-Because we use the system Git executable, Git authentication is handled by Git and its global settings. If you want Lunar to be able to download private repositories, just log into your account as part of your global Git settings.
+Because we use the system Git executable, Git authentication is handled by Git and its global settings. If you want Lunar to be able to download private repositories, just log in to your account as part of your global Git settings.
 
 We recommend keeping both Lune and Git up-to-date. Git, in particular, needs to be at least version `2.24` or so for `lunar` to work with remote repos.
 
